@@ -24,7 +24,7 @@ typedef struct
 
 client_t **clients;
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
-
+// gets message user id and room sends the message to everyone with the same room and with another uid
 void send_message(char *s, int userId, int room)
 {
     pthread_mutex_lock(&clients_mutex);
@@ -47,7 +47,7 @@ void send_message(char *s, int userId, int room)
 
     pthread_mutex_unlock(&clients_mutex);
 }
-
+// gets a client and adds the  client to clients array
 void queue_add(client_t *cl)
 {
     pthread_mutex_lock(&clients_mutex);
@@ -74,6 +74,7 @@ void queue_add(client_t *cl)
     }
     pthread_mutex_unlock(&clients_mutex);
 }
+// gets uid and removes the client with the uid
 void queue_remove(int uid)
 {
     pthread_mutex_lock(&clients_mutex);
@@ -93,6 +94,7 @@ void queue_remove(int uid)
     clients = (clientptr *)realloc(clients, (size--) * sizeof(clientptr));
     pthread_mutex_unlock(&clients_mutex);
 }
+// handles new client
 void *handle_client(client_t *cli)
 {
     char buff_out[BUFFER_SZ];
@@ -106,7 +108,7 @@ void *handle_client(client_t *cli)
 
     if (strlen(name) < 2 || strlen(name) >= 32 - 1)
     {
-        printf("name is not legal.\n");
+        printf("invalid client.\n");
         flag = 0;
     }
     else

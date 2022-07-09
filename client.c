@@ -32,7 +32,7 @@ void str_overwrite_stdout()
     printf("%s", "> ");
     fflush(stdout);
 }
-
+// gets length of message and message and changes \n to \0 end of string
 void str_trim_lf(char *arr, int length)
 {
     int i;
@@ -45,7 +45,7 @@ void str_trim_lf(char *arr, int length)
         }
     }
 }
-
+// sends the message plus the name
 void send_msg_handler()
 {
     char message[BUFSIZ] = {};
@@ -73,7 +73,7 @@ void send_msg_handler()
         str_overwrite_stdout();
     }
 }
-
+// gets the message and prints
 void recv_msg_handler()
 {
     char message[BUFSIZ] = {};
