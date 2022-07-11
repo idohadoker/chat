@@ -1,9 +1,9 @@
 all: client server 
 
-client: client
+client: 
 gcc client.c -o client
 
-server: server
+server: 
 gcc server.c -o server
 
 clean:
