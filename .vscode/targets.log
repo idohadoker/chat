@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jul 13 09:08:30 2022
+# Make data base, printed on Wed Jul 13 09:43:38 2022
 
 # Variables
 
@@ -89,7 +89,7 @@ MAKEFILE_LIST := makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 2925
+VSCODE_PID = 7092
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -156,7 +156,7 @@ LS_COLORS =
 DESKTOP_SESSION = ubuntu
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
-# environment
+# 'override' directive
 GNUMAKEFLAGS := 
 # environment
 LOGNAME = idohadoker
@@ -181,7 +181,7 @@ MANAGERPID = 1600
 # environment
 LC_MEASUREMENT = en_US.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2925
+GIO_LAUNCHED_DESKTOP_FILE_PID = 7092
 # environment
 _ = /usr/share/code/code
 # environment
@@ -221,7 +221,7 @@ GDMSESSION = ubuntu
 # environment
 LC_IDENTIFICATION = en_US.UTF-8
 # variable set hash-table stats:
-# Load=105/1024=10%, Rehash=0, Collisions=4/119=3%
+# Load=105/1024=10%, Rehash=0, Collisions=4/135=3%
 
 # Pattern-specific Variable Values
 
@@ -229,9 +229,9 @@ LC_IDENTIFICATION = en_US.UTF-8
 
 # Directories
 
-# . (device 66306, inode 50334019): 7 files, no impossibilities.
+# . (device 66306, inode 50334019): 9 files, no impossibilities.
 
-# 7 files, no impossibilities in 1 directories.
+# 9 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -241,14 +241,26 @@ LC_IDENTIFICATION = en_US.UTF-8
 
 client:
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Last modified 2022-07-13 09:10:11.159999421
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 4):
+	gcc client.c -o client
 
-# Not a target:
-server:
+clean:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
+#  recipe to execute (from 'makefile', line 10):
+	rm *.o
+
+server:
+#  Implicit rule search has not been done.
+#  Last modified 2022-07-13 09:10:11.251999421
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 7):
+	gcc server.c -o server
 
 # Not a target:
 .DEFAULT:
@@ -258,33 +270,33 @@ server:
 
 all: client server
 #  Command line target.
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
 
 # Not a target:
 makefile:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2022-07-13 09:10:05.363999443
+#  File has been updated.
+#  Successfully updated.
 
 # files hash-table stats:
-# Load=6/1024=1%, Rehash=0, Collisions=0/11=0%
+# Load=7/1024=1%, Rehash=0, Collisions=0/22=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 14 / storage = 114 B / avg = 8 B
-# current buf: size = 8162 B / used = 114 B / count = 14 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 15 / storage = 120 B / avg = 8 B
+# current buf: size = 8162 B / used = 120 B / count = 15 / avg = 8 B
 
-# strcache performance: lookups = 22 / hit rate = 36%
-# hash-table stats:
+# strcache performance: lookups = 28 / hit rate = 46%
  
-makefile:4: *** missing separator.  Stop.
-
-# Load=14/8192=0%, Rehash=0, Collisions=0/22=0%
-# Finished Make data base on Wed Jul 13 09:08:30 2022
+# hash-table stats:
+# Load=15/8192=0%, Rehash=0, Collisions=0/28=0%
+# Finished Make data base on Wed Jul 13 09:43:38 2022
 
  
