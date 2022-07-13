@@ -8,8 +8,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
-#define port 4220
+#define port 4221
 static int size;
 int uid = 10;
 #define BUFFER_SZ 2048
@@ -24,7 +25,24 @@ typedef struct
 
 client_t **clients;
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
+int *status;
 // gets message user id and room sends the message to everyone with the same room and with another uid
+
+int initsocket()
+{
+    int servSockD = socket(AF_INET, SOCK_STREAM, 0);
+    char serMsg[255];
+    struct sockaddr_in servAddr;
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_port = htons(port);
+    servAddr.sin_addr.s_addr = INADDR_ANY;
+    if (bind(servSockD, (struct sockaddr *)&servAddr, sizeof(servAddr)) == -1)
+        exit(1);
+    if (listen(servSockD, size + 1) == -1)
+        exit(1);
+    return servSockD;
+}
+
 void send_message(char *s, int userId, int room)
 {
     pthread_mutex_lock(&clients_mutex);
@@ -86,7 +104,6 @@ void queue_remove(int uid)
             if (clients[i]->uid == uid)
             {
                 clients[i] = clients[size - 1];
-                // flag--;
                 flag = 0;
             }
         }
@@ -98,13 +115,16 @@ void queue_remove(int uid)
 void *handle_client(client_t *cli)
 {
     char buff_out[BUFFER_SZ];
-    char buffnum[BUFFER_SZ];
+    char buffnum[10];
     char name[32];
+    char *index;
     int flag = 1;
-    recv(cli->clSock, name, 32, 0);
-    send(cli->clSock, "ok", 2, 0);
-    bzero(buffnum, sizeof(buffnum));
-    recv(cli->clSock, buffnum, BUFFER_SZ, 0);
+    recv(cli->clSock, buff_out, BUFFER_SZ, 0);
+    index = strstr(buff_out, "-");
+    memset(buffnum, 0, sizeof(buffnum));
+    strncpy(name, buff_out, index - buff_out);
+    strncpy(buffnum, index + 1, strlen(index + 1));
+    memset(buff_out, 0, BUFFER_SZ);
 
     if (strlen(name) < 2 || strlen(name) >= 32 - 1)
     {
@@ -115,15 +135,15 @@ void *handle_client(client_t *cli)
     {
         strncpy(cli->name, name, strlen(name));
         cli->room = atoi(buffnum);
-        bzero(buff_out, BUFFER_SZ);
-        bzero(buffnum, BUFFER_SZ);
+        memset(buff_out, 0, BUFFER_SZ);
+        memset(buffnum, 0, sizeof(buffnum));
         sprintf(buff_out, "%s has joined to room %d\n", cli->name, cli->room);
         puts(buff_out);
         send_message(buff_out, cli->uid, cli->room);
     }
     while (flag)
     {
-        bzero(buff_out, BUFFER_SZ);
+        memset(buff_out, 0, BUFFER_SZ);
         int receive = recv(cli->clSock, buff_out, BUFFER_SZ, 0);
         if (receive > 0)
         {
@@ -144,43 +164,48 @@ void *handle_client(client_t *cli)
             printf("ERROR: -1\n");
             flag = 0;
         }
-        bzero(buff_out, BUFFER_SZ);
+        memset(buff_out, 0, BUFFER_SZ);
     }
     close(cli->clSock);
     queue_remove(cli->uid);
     return NULL;
 }
-
+/*void destroy(int fd)
+{
+    free(clients);
+    pthread_detach(&clients_mutex);
+    pthread_detach(&handle_client);
+}*/
+int startclient(int fd)
+{
+    int flag = 1;
+    struct sockaddr_in clientAddr;
+    pthread_t tid;
+    socklen_t clilen = sizeof(clientAddr);
+    int clientSocket = accept(fd, (struct sockaddr *)&clientAddr, &clilen);
+    printf("Connection succeed\n");
+    client_t *cli = (client_t *)malloc(sizeof(client_t));
+    if (cli == NULL)
+    {
+        printf("memory allocation failure\n");
+        flag = 0;
+    }
+    cli->address = clientAddr;
+    cli->clSock = clientSocket;
+    cli->uid = uid++;
+    queue_add(cli);
+    if (flag != -1 && pthread_create(&tid, NULL, (void *)&handle_client, cli))
+        flag = 0;
+    return flag;
+}
 int main(int argc, char const *argv[])
 {
-    int servSockD = socket(AF_INET, SOCK_STREAM, 0);
-    pthread_t tid;
-    char serMsg[255];
-    struct sockaddr_in servAddr;
-    struct sockaddr_in clientAddr;
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(port);
-    servAddr.sin_addr.s_addr = INADDR_ANY;
-    if (bind(servSockD, (struct sockaddr *)&servAddr, sizeof(servAddr)) == -1)
-        exit(1);
-    if (listen(servSockD, size + 1) == -1)
-        exit(1);
-    while (1)
+    int status = 1;
+    int fd = initsocket();
+    while (status && true)
     {
-        socklen_t clilen = sizeof(clientAddr);
-        int clientSocket = accept(servSockD, (struct sockaddr *)&clientAddr, &clilen);
-        printf("Connection succeed\n");
-        client_t *cli = (client_t *)malloc(sizeof(client_t));
-        if (cli == NULL)
-        {
-            printf("memory allocation failure\n");
-            exit(1);
-        }
-        cli->address = clientAddr;
-        cli->clSock = clientSocket;
-        cli->uid = uid++;
-        queue_add(cli);
-        pthread_create(&tid, NULL, (void *)&handle_client, cli);
+        status = startclient(fd);
     }
+    //  destroy(fd);
     return 0;
 }

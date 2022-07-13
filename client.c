@@ -10,12 +10,13 @@
 #include <pthread.h>
 #include <ctype.h>
 
-#define port 4220
+#define port 4221
 
 // Global variables
 int flag = 0;
 int sockfd = 0;
-char name[32], ok[2];
+char name[32];
+char *firstMsg = NULL;
 int numlen(int room)
 {
     int c = 1;
@@ -63,13 +64,13 @@ void send_msg_handler()
         }
         else
         {
-            bzero(buffer, sizeof(buffer));
+            memset(buffer, 0, sizeof(buffer));
             sprintf(buffer, "%s: %s\n", name, message);
             if (strlen(message) >= 1)
                 send(sockfd, buffer, strlen(buffer), 0);
         }
-        bzero(message, BUFSIZ);
-        bzero(buffer, sizeof(buffer));
+        memset(message, 0, BUFSIZ);
+        memset(buffer, 0, sizeof(buffer));
         str_overwrite_stdout();
     }
 }
@@ -94,11 +95,10 @@ void recv_msg_handler()
         {
             exit(1);
         }
-        bzero(message, sizeof(message));
+        memset(message, 0, sizeof(message));
     }
 }
-
-int main(int argc, char **argv)
+int init_socket()
 {
     struct sockaddr_in server_addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -110,6 +110,10 @@ int main(int argc, char **argv)
         printf("ERROR: connect\n");
         exit(1);
     }
+    return sockfd;
+}
+void get_name_and_room()
+{
     int room = 0;
     printf("Please enter your name: ");
     fgets(name, 32, stdin);
@@ -135,10 +139,20 @@ int main(int argc, char **argv)
     }
     sprintf(nums, "%d", room);
     str_trim_lf(nums, strlen(nums));
-    send(sockfd, name, sizeof(name), 0);
-    recv(sockfd, ok, sizeof(ok), 0);
-    send(sockfd, nums, strlen(nums), 0);
+    firstMsg = (char *)malloc(strlen(name) + strlen(nums) + 1);
+    if (firstMsg == NULL)
+    {
+        printf("memory allocation failure\n");
+        exit(1);
+    }
+    strncpy(firstMsg, name, strlen(name));
+    strncat(firstMsg, "-", 3);
+    strncat(firstMsg, nums, strlen(nums));
+    send(sockfd, firstMsg, strlen(firstMsg), 0);
     printf("=== WELCOME TO THE CHATROOM %d ===\n", room);
+}
+void send_recv()
+{
     pthread_t send_msg_thread;
     if (pthread_create(&send_msg_thread, NULL, (void *)send_msg_handler, NULL) != 0)
     {
@@ -160,8 +174,12 @@ int main(int argc, char **argv)
             break;
         }
     }
-
     close(sockfd);
-
+}
+int main(int argc, char **argv)
+{
+    sockfd = init_socket();
+    get_name_and_room();
+    send_recv();
     exit(0);
 }
