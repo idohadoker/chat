@@ -62,7 +62,6 @@ void send_message(char *s, int userId, int room)
                 }
         }
     }
-
     pthread_mutex_unlock(&clients_mutex);
 }
 // gets a client and adds the  client to clients array
@@ -168,14 +167,14 @@ void *handle_client(client_t *cli)
     }
     close(cli->clSock);
     queue_remove(cli->uid);
+    pthread_join(pthread_self(), NULL);
     return NULL;
 }
-/*void destroy(int fd)
+void destroy(int fd)
 {
     free(clients);
-    pthread_detach(&clients_mutex);
-    pthread_detach(&handle_client);
-}*/
+    pthread_mutex_destroy(&clients_mutex);
+}
 int startclient(int fd)
 {
     int flag = 1;
